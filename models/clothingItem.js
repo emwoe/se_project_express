@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-var validator = require("validator");
+const validator = require("validator");
 
 const clothingItemSchema = new mongoose.Schema({
   name: {
@@ -26,7 +26,7 @@ const clothingItemSchema = new mongoose.Schema({
     },
   },
 
-  creator: {
+  owner: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "user",
     required: true,

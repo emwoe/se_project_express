@@ -1,6 +1,9 @@
 const express = require("express");
+
 const app = express();
+/*
 const bodyParser = require("body-parser");
+*/
 const mongoose = require("mongoose");
 const clothingItemRouter = require("./routes/clothingItems");
 const userRouter = require("./routes/users");
@@ -27,12 +30,9 @@ mongoose
   })
   .catch(console.error);
 
-app.get("/", (req, res) => {
-  res.send("Hello World!");
-});
-
 app.use((req, res, next) => {
   res.status(NOT_FOUND_CODE).send({ message: "Requested resource not found" });
+  next();
 });
 
 app.listen(PORT, () => {

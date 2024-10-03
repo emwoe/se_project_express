@@ -7,10 +7,11 @@ const {
 
 module.exports.validateId = (req, res, next) => {
   const { itemId } = req.params;
-  const specialChars = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
+  console.log(itemId);
+  const specialChars = /[`!@#$%^&*()_+\-=[\]{};':"\\|,.<>?~]/;
+  console.log(specialChars.test(itemId));
   if (specialChars.test(itemId) || itemId.length < 24 || itemId.length > 25) {
     res.status(400).send({ message: "Invalid ID" });
-    return;
   } else {
     next();
   }
@@ -19,17 +20,11 @@ module.exports.validateId = (req, res, next) => {
 module.exports.getClothingItems = (req, res) => {
   clothingItem
     .find({})
-    .then((items) => res.status(200).send({ data: items }))
-    .catch((err) => {
-      if (err.name === "ValidationError") {
-        res.status(VALIDATION_ERROR_CODE).send({ message: err.message });
-      } else if (err.name === "CastError") {
-        res.status(NOT_FOUND_CODE).send({ message: err.message });
-      } else {
-        res
-          .status(DEFAULT_ERROR_CODE)
-          .send({ message: "An error has occurred on the server." });
-      }
+    .then((items) => res.send({ data: items }))
+    .catch(() => {
+      res
+        .status(DEFAULT_ERROR_CODE)
+        .send({ message: "An error has occurred on the server." });
     });
 };
 
@@ -39,13 +34,11 @@ module.exports.createClothingItem = (req, res) => {
   console.log(req.body);
 
   clothingItem
-    .create({ name, weather, imageUrl, creator: req.user._id })
+    .create({ name, weather, imageUrl, owner: req.user._id })
     .then((item) => res.status(201).send({ data: item }))
     .catch((err) => {
       if (err.name === "ValidationError") {
         res.status(VALIDATION_ERROR_CODE).send({ message: err.message });
-      } else if (err.name === "CastError") {
-        res.status(NOT_FOUND_CODE).send({ message: err.message });
       } else {
         res
           .status(DEFAULT_ERROR_CODE)
@@ -65,14 +58,13 @@ module.exports.deleteClothingItem = (req, res) => {
       error.message = "Item ID not found";
       throw error;
     })
-    .then((item) => res.status(200).send({ data: item }))
+    .then((item) => res.send({ data: item }))
     .catch((err) => {
+      console.log("error type is:");
+      console.log(err.name);
       if (err.name === "ValidationError") {
         res.status(VALIDATION_ERROR_CODE).send({ message: err.message });
-      } else if (
-        err.name === "CastError" ||
-        err.statusCode === NOT_FOUND_CODE
-      ) {
+      } else if (err.statusCode === NOT_FOUND_CODE) {
         res.status(NOT_FOUND_CODE).send({ message: err.message });
       } else {
         res
@@ -99,7 +91,7 @@ module.exports.likeClothingItem = (req, res) => {
     })
     .then((item) => res.status(201).send({ data: item }))
     .catch((err) => {
-      if (err.name === "CastError" || err.statusCode === NOT_FOUND_CODE) {
+      if (err.statusCode === NOT_FOUND_CODE) {
         res.status(NOT_FOUND_CODE).send({ message: err.message });
       } else {
         res
@@ -124,9 +116,9 @@ module.exports.unlikeClothingItem = (req, res) => {
       error.message = "Item ID not found";
       throw error;
     })
-    .then((item) => res.status(200).send({ data: item }))
+    .then((item) => res.send({ data: item }))
     .catch((err) => {
-      if (err.name === "CastError" || err.statusCode === NOT_FOUND_CODE) {
+      if (err.statusCode === NOT_FOUND_CODE) {
         res.status(NOT_FOUND_CODE).send({ message: err.message });
       } else {
         res

@@ -7,10 +7,9 @@ const {
 
 module.exports.validateId = (req, res, next) => {
   const { userId } = req.params;
-  const specialChars = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
+  const specialChars = /[`!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?~]/;
   if (specialChars.test(userId) || userId.length < 24 || userId.length > 25) {
     res.status(400).send({ message: "Invalid ID" });
-    return;
   } else {
     next();
   }
@@ -18,7 +17,7 @@ module.exports.validateId = (req, res, next) => {
 
 module.exports.getUsers = (req, res) => {
   User.find({})
-    .then((users) => res.status(200).send({ data: users }))
+    .then((users) => res.send({ data: users }))
     .catch((err) => {
       console.error(err.name);
       res
@@ -36,16 +35,13 @@ module.exports.getUser = (req, res) => {
       error.message = "User ID not found";
       throw error;
     })
-    .then((user) => res.status(200).send({ data: user }))
+    .then((user) => res.send({ data: user }))
     .catch((err) => {
       console.log("error type is:");
       console.log(err.name);
       if (err.name === "ValidationError") {
         res.status(VALIDATION_ERROR_CODE).send({ message: err.message });
-      } else if (
-        err.name === "CastError" ||
-        err.statusCode === NOT_FOUND_CODE
-      ) {
+      } else if (err.statusCode === NOT_FOUND_CODE) {
         res.status(NOT_FOUND_CODE).send({ message: err.message });
       } else {
         res
