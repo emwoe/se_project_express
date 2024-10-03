@@ -4,28 +4,21 @@ const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const clothingItemRouter = require("./routes/clothingItems");
 const userRouter = require("./routes/users");
+const { NOT_FOUND_CODE } = require("./utils/errors");
 
 const { PORT = 3001 } = process.env;
 
 app.use(express.json());
 
-function checkAddress(req, res, next) {
-  if (res.statusCode === 404) {
-    res.send("The requested item could not be found");
-  }
+app.use("/", (req, res, next) => {
+  req.user = {
+    _id: "66fd75e6eb5d673668892101",
+  };
   next();
-}
+});
 
 app.use("/", clothingItemRouter);
 app.use("/", userRouter);
-
-/*
-app.use("/", function (res, req, next) {
-  if (res.statusCode === 404) {
-    res.send({ message: "The requested item could not be found" });
-  }
-});
-*/
 
 mongoose
   .connect("mongodb://127.0.0.1:27017/wtwr_db")
@@ -39,14 +32,7 @@ app.get("/", (req, res) => {
 });
 
 app.use((req, res, next) => {
-  req.user = {
-    _id: "66fd75e6eb5d673668892101",
-  };
-  next();
-});
-
-app.use((req, res, next) => {
-  res.status(404).send({ message: "Requested resource not found" });
+  res.status(NOT_FOUND_CODE).send({ message: "Requested resource not found" });
 });
 
 app.listen(PORT, () => {

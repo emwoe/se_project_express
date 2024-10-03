@@ -25,13 +25,13 @@ const clothingItemSchema = new mongoose.Schema({
       message: "You must enter a valid URL",
     },
   },
-  /* This needs to be fixed
+
   creator: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "user",
     required: true,
   },
-*/
+
   likes: [
     {
       type: mongoose.Schema.Types.ObjectId,
