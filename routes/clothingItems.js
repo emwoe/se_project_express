@@ -1,7 +1,6 @@
 const router = require("express").Router();
 
 const {
-  validateId,
   getClothingItems,
   createClothingItem,
   deleteClothingItem,
@@ -9,13 +8,15 @@ const {
   unlikeClothingItem,
 } = require("../controllers/clothingItems");
 
+const { validateItemId } = require("../utils/validators");
+
 router.get("/items", getClothingItems);
 
 router.post("/items", createClothingItem);
 
-router.delete("/items/:itemId", validateId, deleteClothingItem);
+router.delete("/items/:itemId", validateItemId, deleteClothingItem);
 
-router.put("/items/:itemId/likes", validateId, likeClothingItem);
+router.put("/items/:itemId/likes", validateItemId, likeClothingItem);
 
 router.delete("/items/:itemId/likes", validateId, unlikeClothingItem);
 

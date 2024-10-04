@@ -1,15 +1,12 @@
 const router = require("express").Router();
 
-const {
-  validateId,
-  getUsers,
-  getUser,
-  createUser,
-} = require("../controllers/users");
+const { getUsers, getUser, createUser } = require("../controllers/users");
+
+const { validateUserId } = require("../utils/validators");
 
 router.get("/users", getUsers);
 
-router.get("/users/:userId", validateId, getUser);
+router.get("/users/:userId", validateUserId, getUser);
 
 router.post("/users", createUser);
 

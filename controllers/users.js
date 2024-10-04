@@ -5,16 +5,6 @@ const {
   DEFAULT_ERROR_CODE,
 } = require("../utils/errors");
 
-module.exports.validateId = (req, res, next) => {
-  const { userId } = req.params;
-  const specialChars = /[`!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?~]/;
-  if (specialChars.test(userId) || userId.length < 24 || userId.length > 25) {
-    res.status(400).send({ message: "Invalid ID" });
-  } else {
-    next();
-  }
-};
-
 module.exports.getUsers = (req, res) => {
   User.find({})
     .then((users) => res.send({ data: users }))
@@ -39,7 +29,7 @@ module.exports.getUser = (req, res) => {
     .catch((err) => {
       console.log("error type is:");
       console.log(err.name);
-      if (err.name === "ValidationError") {
+      if (err.name === "ValidationError" || err.name === "CastError") {
         res.status(VALIDATION_ERROR_CODE).send({ message: err.message });
       } else if (err.statusCode === NOT_FOUND_CODE) {
         res.status(NOT_FOUND_CODE).send({ message: err.message });

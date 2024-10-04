@@ -5,18 +5,6 @@ const {
   DEFAULT_ERROR_CODE,
 } = require("../utils/errors");
 
-module.exports.validateId = (req, res, next) => {
-  const { itemId } = req.params;
-  console.log(itemId);
-  const specialChars = /[`!@#$%^&*()_+\-=[\]{};':"\\|,.<>?~]/;
-  console.log(specialChars.test(itemId));
-  if (specialChars.test(itemId) || itemId.length < 24 || itemId.length > 25) {
-    res.status(400).send({ message: "Invalid ID" });
-  } else {
-    next();
-  }
-};
-
 module.exports.getClothingItems = (req, res) => {
   clothingItem
     .find({})
@@ -62,7 +50,7 @@ module.exports.deleteClothingItem = (req, res) => {
     .catch((err) => {
       console.log("error type is:");
       console.log(err.name);
-      if (err.name === "ValidationError") {
+      if (err.name === "CastError") {
         res.status(VALIDATION_ERROR_CODE).send({ message: err.message });
       } else if (err.statusCode === NOT_FOUND_CODE) {
         res.status(NOT_FOUND_CODE).send({ message: err.message });
@@ -93,6 +81,8 @@ module.exports.likeClothingItem = (req, res) => {
     .catch((err) => {
       if (err.statusCode === NOT_FOUND_CODE) {
         res.status(NOT_FOUND_CODE).send({ message: err.message });
+      } else if (err.name === "CastError") {
+        res.status(VALIDATION_ERROR_CODE).send({ message: err.message });
       } else {
         res
           .status(DEFAULT_ERROR_CODE)
@@ -120,6 +110,8 @@ module.exports.unlikeClothingItem = (req, res) => {
     .catch((err) => {
       if (err.statusCode === NOT_FOUND_CODE) {
         res.status(NOT_FOUND_CODE).send({ message: err.message });
+      } else if (err.name === "CastError") {
+        res.status(VALIDATION_ERROR_CODE).send({ message: err.message });
       } else {
         res
           .status(DEFAULT_ERROR_CODE)
