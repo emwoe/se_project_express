@@ -18,6 +18,6 @@ router.delete("/items/:itemId", validateItemId, deleteClothingItem);
 
 router.put("/items/:itemId/likes", validateItemId, likeClothingItem);
 
-router.delete("/items/:itemId/likes", validateId, unlikeClothingItem);
+router.delete("/items/:itemId/likes", validateItemId, unlikeClothingItem);
 
 module.exports = router;

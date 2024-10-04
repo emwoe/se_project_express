@@ -1,3 +1,5 @@
+const { VALIDATION_ERROR_CODE } = require("./errors");
+
 module.exports.validateItemId = (req, res, next) => {
   const { itemId } = req.params;
   console.log(itemId);
