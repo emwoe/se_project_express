@@ -1,4 +1,8 @@
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+
 const User = require("../models/user");
+const { JWT_SECRET } = require("../utils/config");
 
 const {
   VALIDATION_ERROR_CODE,
@@ -44,28 +48,48 @@ module.exports.getUser = (req, res) => {
 
 module.exports.createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
-  console.log("Checking for existing user email...");
-
-  User.findOne({ email }).then((user) => {
-    if (user) {
-      console.log("User found. Rejecting...");
-      return Promise.reject(new Error("Email already exists"));
-    }
-    console.log("No user found. Creating new user...");
-    return User.create({ name, avatar, email, password })
-      .then((newUser) => res.status(201).send({ data: newUser }))
-      .catch((err) => {
-        console.log("Error caught", err);
-
-        if (err.message === "Email already registered.") {
-          return res.status(409).send({ message: err.message });
-        } else if (err.name === "ValidationError") {
-          res.status(VALIDATION_ERROR_CODE).send({ message: err.message });
-        } else {
-          res
-            .status(DEFAULT_ERROR_CODE)
-            .send({ message: "An error has occurred on the server." });
-        }
+  User.findOne({ email })
+    .then((user) => {
+      if (user) {
+        return Promise.reject(new Error("Email already registered"));
+      }
+      return bcrypt.hash(password, 10);
+    })
+    .then((hash) => {
+      return User.create({
+        name,
+        avatar,
+        email,
+        password: hash,
       });
-  });
+    })
+    .then((newUser) => {
+      res.status(201).send({ data: newUser });
+    })
+    .catch((err) => {
+      if (err.message === "Email already registered") {
+        return res.status(409).send({ message: err.message });
+      } else if (err.name === "ValidationError") {
+        res.status(VALIDATION_ERROR_CODE).send({ message: err.message });
+      } else {
+        res
+          .status(DEFAULT_ERROR_CODE)
+          .send({ message: "An error has occurred on the server." });
+      }
+    });
+};
+
+module.exports.login = (req, res) => {
+  const { email, password } = req.body;
+
+  User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+        expiresIn: "7d",
+      });
+      res.send({ token });
+    })
+    .catch((err) => {
+      res.status(401).send({ message: err.message });
+    });
 };
