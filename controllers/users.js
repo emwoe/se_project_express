@@ -48,9 +48,10 @@ module.exports.getUser = (req, res) => {
 
 module.exports.createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
+  console.log(req.body.email === undefined);
   User.findOne({ email })
     .then((user) => {
-      if (user) {
+      if (user && req.body.email != undefined) {
         return Promise.reject(new Error("Email already registered"));
       }
       return bcrypt.hash(password, 10);
@@ -64,7 +65,7 @@ module.exports.createUser = (req, res) => {
       });
     })
     .then((newUser) => {
-      res.status(201).send({ data: newUser });
+      res.status(201).send({ name, avatar, email });
     })
     .catch((err) => {
       if (err.message === "Email already registered") {
@@ -90,7 +91,13 @@ module.exports.login = (req, res) => {
       res.send({ token });
     })
     .catch((err) => {
-      if (err.name === "ValidationError" || err.name === "CastError") {
+      console.log(err.message);
+      if (
+        err.name === "ValidationError" ||
+        err.name === "CastError" ||
+        err.name === "ReferenceError" ||
+        err.message.includes("undefined")
+      ) {
         res.status(VALIDATION_ERROR_CODE).send({ message: err.message });
       } else {
         res.status(401).send({ message: err.message });
@@ -99,24 +106,30 @@ module.exports.login = (req, res) => {
 };
 
 module.exports.getCurrentUser = (req, res) => {
-  User.findById(req.params.userId)
-    .then((user) => res.send({ data: user }))
+  console.log(req.user, req.user._id);
+  User.findById(req.user._id)
+    .then((user) => {
+      console.log(user);
+      res.send({ data: user });
+    })
     .catch((err) => {
       res.status(400).send({ message: err.message });
     });
 };
 
 module.exports.editUserProfile = (req, res) => {
-  const { newName, newAvatar } = req.body;
+  const { name, avatar } = req.body;
+  console.log(req.body);
   User.findByIdAndUpdate(
-    req.params._id,
-    { name: newName, avatar: newAvatar },
+    req.user._id,
+    { name: name, avatar: avatar },
     { new: true }
   )
-    .then((user) => res.send({ data: user }))
+    .then((user) => {
+      console.log(user);
+      res.send({ data: user });
+    })
     .catch((err) => {
-      console.log("error type is:");
-      console.log(err.name);
       if (err.name === "ValidationError" || err.name === "CastError") {
         res.status(VALIDATION_ERROR_CODE).send({ message: err.message });
       } else if (err.statusCode === NOT_FOUND_CODE) {
