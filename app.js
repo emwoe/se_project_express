@@ -1,4 +1,5 @@
 const express = require("express");
+const cors = require("cors");
 
 const app = express();
 /*
@@ -7,11 +8,15 @@ const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const clothingItemRouter = require("./routes/clothingItems");
 const userRouter = require("./routes/users");
+const mainRouter = require("./routes/index");
 const { NOT_FOUND_CODE } = require("./utils/errors");
 
 const { PORT = 3001 } = process.env;
 
 app.use(express.json());
+app.use(cors());
+
+/*
 
 app.use("/", (req, res, next) => {
   req.user = {
@@ -20,6 +25,9 @@ app.use("/", (req, res, next) => {
   next();
 });
 
+*/
+
+app.use("/", mainRouter);
 app.use("/", clothingItemRouter);
 app.use("/", userRouter);
 

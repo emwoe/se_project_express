@@ -90,6 +90,41 @@ module.exports.login = (req, res) => {
       res.send({ token });
     })
     .catch((err) => {
-      res.status(401).send({ message: err.message });
+      if (err.name === "ValidationError" || err.name === "CastError") {
+        res.status(VALIDATION_ERROR_CODE).send({ message: err.message });
+      } else {
+        res.status(401).send({ message: err.message });
+      }
+    });
+};
+
+module.exports.getCurrentUser = (req, res) => {
+  User.findById(req.params.userId)
+    .then((user) => res.send({ data: user }))
+    .catch((err) => {
+      res.status(400).send({ message: err.message });
+    });
+};
+
+module.exports.editUserProfile = (req, res) => {
+  const { newName, newAvatar } = req.body;
+  User.findByIdAndUpdate(
+    req.params._id,
+    { name: newName, avatar: newAvatar },
+    { new: true }
+  )
+    .then((user) => res.send({ data: user }))
+    .catch((err) => {
+      console.log("error type is:");
+      console.log(err.name);
+      if (err.name === "ValidationError" || err.name === "CastError") {
+        res.status(VALIDATION_ERROR_CODE).send({ message: err.message });
+      } else if (err.statusCode === NOT_FOUND_CODE) {
+        res.status(NOT_FOUND_CODE).send({ message: err.message });
+      } else {
+        res
+          .status(DEFAULT_ERROR_CODE)
+          .send({ message: "An error has occurred on the server." });
+      }
     });
 };
