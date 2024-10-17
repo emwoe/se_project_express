@@ -1,6 +1,7 @@
 const clothingItem = require("../models/clothingItem");
 const {
   VALIDATION_ERROR_CODE,
+  NO_MATCH_CODE,
   NOT_FOUND_CODE,
   DEFAULT_ERROR_CODE,
 } = require("../utils/errors");
@@ -38,36 +39,36 @@ module.exports.createClothingItem = (req, res) => {
 module.exports.deleteClothingItem = (req, res) => {
   clothingItem
     .findById(req.params.itemId)
-    .orFail()
+    .orFail(() => {
+      const error = new Error("Item ID not found");
+      error.statusCode = NOT_FOUND_CODE;
+      error.message = "Item ID not found";
+      throw error;
+    })
     .then((item) => {
       const ownerId = item.owner.toString();
       if (ownerId !== req.user._id) {
         return res
-          .status(403)
+          .status(NO_MATCH_CODE)
           .send({ message: "You are not the owner of this item." });
       }
       return clothingItem
         .findByIdAndRemove(req.params.itemId)
-        .orFail(() => {
-          const error = new Error("Item ID not found");
-          error.statusCode = NOT_FOUND_CODE;
-          error.message = "Item ID not found";
-          throw error;
-        })
-        .then((item) => res.send({ data: item }))
-        .catch((err) => {
-          console.log("error type is:");
-          console.log(err.name);
-          if (err.name === "CastError") {
-            res.status(VALIDATION_ERROR_CODE).send({ message: err.message });
-          } else if (err.statusCode === NOT_FOUND_CODE) {
-            res.status(NOT_FOUND_CODE).send({ message: err.message });
-          } else {
-            res
-              .status(DEFAULT_ERROR_CODE)
-              .send({ message: "An error has occurred on the server." });
-          }
-        });
+
+        .then(() => res.send({ data: item })); // (item)
+    })
+    .catch((err) => {
+      console.log("error type is:");
+      console.log(err.name);
+      if (err.name === "CastError") {
+        res.status(VALIDATION_ERROR_CODE).send({ message: err.message });
+      } else if (err.statusCode === NOT_FOUND_CODE) {
+        res.status(NOT_FOUND_CODE).send({ message: err.message });
+      } else {
+        res
+          .status(DEFAULT_ERROR_CODE)
+          .send({ message: "An error has occurred on the server." });
+      }
     });
 };
 

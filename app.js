@@ -16,17 +16,6 @@ const { PORT = 3001 } = process.env;
 app.use(express.json());
 app.use(cors());
 
-/*
-
-app.use("/", (req, res, next) => {
-  req.user = {
-    _id: "66fd75e6eb5d673668892101",
-  };
-  next();
-});
-
-*/
-
 app.use("/", mainRouter);
 app.use("/", clothingItemRouter);
 app.use("/", userRouter);
