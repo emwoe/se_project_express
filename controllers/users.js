@@ -26,20 +26,24 @@ module.exports.createUser = (req, res) => {
       }
       return bcrypt.hash(password, 10);
     })
-    .then((hash) => User.create({
+    .then((hash) =>
+      User.create({
         name,
         avatar,
         email,
         password: hash,
-      }))
-    .then(() => 
-      // (newUser)
-       res.status(201).send({ name, avatar, email }) // no return
+      })
+    )
+    .then(
+      () =>
+        // (newUser)
+        res.status(201).send({ name, avatar, email }) // no return
     )
     .catch((err) => {
       if (err.message === "Email already registered") {
         return res.status(DUPLICATE_CODE).send({ message: err.message });
-      } if (err.name === "ValidationError") {
+      }
+      if (err.name === "ValidationError") {
         return res.status(VALIDATION_ERROR_CODE).send({ message: err.message });
       }
       return res
@@ -116,7 +120,7 @@ module.exports.editUserProfile = (req, res) => {
     .catch((err) => {
       if (err.name === "ValidationError" || err.name === "CastError") {
         res.status(VALIDATION_ERROR_CODE).send({ message: err.message });
-      } else if (err.name === "DocumentNotFoundError") {
+      } else if (err.statusCode === NOT_FOUND_CODE) {
         res.status(NOT_FOUND_CODE).send({ message: err.message });
       } else {
         res
