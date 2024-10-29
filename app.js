@@ -11,7 +11,7 @@ const userRouter = require("./routes/users");
 const mainRouter = require("./routes/index");
 const { NOT_FOUND_CODE } = require("./utils/errors");
 
-const { PORT = 3001 } = process.env;
+const { PORT = 3002 } = process.env;
 
 app.use(express.json());
 app.use(cors());
