@@ -17,7 +17,7 @@ module.exports.createUser = (req, res) => {
   if (!email) {
     return res
       .status(VALIDATION_ERROR_CODE)
-      .send({ message: "No email provided." });
+      .send({ message: "No email provided" });
   }
   return User.findOne({ email })
     .then((user) => {
@@ -63,10 +63,11 @@ module.exports.login = (req, res) => {
 
   return User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+      const usertoken = jwt.sign({ _id: user._id }, JWT_SECRET, {
         expiresIn: "7d",
       });
-      res.send({ token });
+      const userdata = user;
+      res.send({ userdata, usertoken });
     })
     .catch((err) => {
       console.log(err.name);
@@ -79,6 +80,7 @@ module.exports.login = (req, res) => {
 };
 
 module.exports.getCurrentUser = (req, res) => {
+  console.log("Current user is");
   console.log(req.user, req.user._id);
   User.findById(req.user._id)
     .orFail(() => {
