@@ -103,10 +103,10 @@ module.exports.getCurrentUser = (req, res) => {
 };
 
 module.exports.editUserProfile = (req, res) => {
-  const { name, avatar } = req.body;
+  const { newName, newImageUrl } = req.body;
   User.findByIdAndUpdate(
     req.user._id,
-    { name, avatar },
+    { name: newName, avatar: newImageUrl },
     { new: true, runValidators: true }
   )
     .orFail(() => {
