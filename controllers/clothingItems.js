@@ -23,7 +23,7 @@ module.exports.createClothingItem = (req, res) => {
   console.log(req.body);
 
   clothingItem
-    .create({ name, weather, imageUrl, owner: req.user._id })
+    .create({ name, weather, imageUrl, owner: req.user._id, likes: [] })
     .then((item) => res.status(201).send({ data: item }))
     .catch((err) => {
       if (err.name === "ValidationError") {
@@ -77,7 +77,7 @@ module.exports.likeClothingItem = (req, res) => {
 
   clothingItem
     .findByIdAndUpdate(
-      req.params.itemId,
+      req.params.id,
       { $addToSet: { likes: req.user._id } },
       { new: true }
     )
@@ -106,7 +106,7 @@ module.exports.unlikeClothingItem = (req, res) => {
 
   clothingItem
     .findByIdAndUpdate(
-      req.params.itemId,
+      req.params.id,
       { $pull: { likes: req.user._id } },
       { new: true }
     )
