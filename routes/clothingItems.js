@@ -20,7 +20,7 @@ router.use(auth);
 
 router.post("/items", auth, createClothingItem);
 
-router.delete("/items/:itemId", validateItemId, auth, deleteClothingItem);
+router.delete("/items/:id", validateItemId, auth, deleteClothingItem);
 
 router.put("/items/:id/likes", validateItemId, auth, likeClothingItem);
 

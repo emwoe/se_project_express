@@ -37,8 +37,9 @@ module.exports.createClothingItem = (req, res) => {
 };
 
 module.exports.deleteClothingItem = (req, res) => {
+  console.log(req.params);
   clothingItem
-    .findById(req.params.itemId)
+    .findById(req.params.id)
     .orFail(() => {
       const error = new Error("Item ID not found");
       error.statusCode = NOT_FOUND_CODE;
