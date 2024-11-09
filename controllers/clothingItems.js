@@ -54,7 +54,7 @@ module.exports.deleteClothingItem = (req, res) => {
           .send({ message: "You are not the owner of this item." });
       }
       return clothingItem
-        .findByIdAndRemove(req.params.itemId)
+        .findByIdAndRemove(req.params.id)
 
         .then(() => res.send({ data: item })); // (item)
     })
