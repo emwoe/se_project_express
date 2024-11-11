@@ -37,7 +37,7 @@ module.exports.createClothingItem = (req, res) => {
 };
 
 module.exports.deleteClothingItem = (req, res) => {
-  console.log(req.params);
+  console.log(req.params.id);
   clothingItem
     .findById(req.params.id)
     .orFail(() => {
@@ -74,7 +74,8 @@ module.exports.deleteClothingItem = (req, res) => {
 };
 
 module.exports.likeClothingItem = (req, res) => {
-  console.log(req.params);
+  console.log(req.params.id);
+  console.log(req.user._id);
 
   clothingItem
     .findByIdAndUpdate(
@@ -88,7 +89,7 @@ module.exports.likeClothingItem = (req, res) => {
       error.message = "Item ID not found";
       throw error;
     })
-    .then((item) => res.status(201).send({ data: item }))
+    .then((item) => res.status(201).send({ item }))
     .catch((err) => {
       if (err.statusCode === NOT_FOUND_CODE) {
         res.status(NOT_FOUND_CODE).send({ message: err.message });
@@ -103,8 +104,6 @@ module.exports.likeClothingItem = (req, res) => {
 };
 
 module.exports.unlikeClothingItem = (req, res) => {
-  console.log(req.params);
-
   clothingItem
     .findByIdAndUpdate(
       req.params.id,
@@ -117,7 +116,7 @@ module.exports.unlikeClothingItem = (req, res) => {
       error.message = "Item ID not found";
       throw error;
     })
-    .then((item) => res.send({ data: item }))
+    .then((item) => res.send({ item }))
     .catch((err) => {
       if (err.statusCode === NOT_FOUND_CODE) {
         res.status(NOT_FOUND_CODE).send({ message: err.message });
