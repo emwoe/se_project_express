@@ -1,23 +1,28 @@
 const clothingItem = require("../models/clothingItem");
+
+/*
 const {
   VALIDATION_ERROR_CODE,
   NO_MATCH_CODE,
   NOT_FOUND_CODE,
-  DEFAULT_ERROR_CODE,
+  DEFAULT_ERROR_CODE,/
 } = require("../utils/errors");
+ */
 
-module.exports.getClothingItems = (req, res) => {
+const NotFoundError = require("../errors/not-found-error");
+const BadRequestError = require("../errors/bad-request-error");
+const ForbiddenError = require("../errors/forbidden-error");
+
+module.exports.getClothingItems = (req, res, next) => {
   clothingItem
     .find({})
     .then((items) => res.send({ data: items }))
     .catch(() => {
-      res
-        .status(DEFAULT_ERROR_CODE)
-        .send({ message: "An error has occurred on the server." });
+      next(err);
     });
 };
 
-module.exports.createClothingItem = (req, res) => {
+module.exports.createClothingItem = (req, res, next) => {
   console.log(req.user._id);
   const { name, weather, imageUrl } = req.body;
   console.log(req.body);
@@ -27,53 +32,46 @@ module.exports.createClothingItem = (req, res) => {
     .then((item) => res.status(201).send({ data: item }))
     .catch((err) => {
       if (err.name === "ValidationError") {
-        res.status(VALIDATION_ERROR_CODE).send({ message: err.message });
+        throw new BadRequestError(
+          "Something about this request isn't formatted correctly."
+        );
       } else {
-        res
-          .status(DEFAULT_ERROR_CODE)
-          .send({ message: "An error has occurred on the server." });
+        next(err);
       }
     });
 };
 
-module.exports.deleteClothingItem = (req, res) => {
+module.exports.deleteClothingItem = (req, res, next) => {
   console.log(req.params.id);
   clothingItem
     .findById(req.params.id)
     .orFail(() => {
-      const error = new Error("Item ID not found");
-      error.statusCode = NOT_FOUND_CODE;
-      error.message = "Item ID not found";
-      throw error;
+      throw new NotFoundError("Item ID not found.");
     })
     .then((item) => {
       const ownerId = item.owner.toString();
       if (ownerId !== req.user._id) {
-        return res
-          .status(NO_MATCH_CODE)
-          .send({ message: "You are not the owner of this item." });
+        throw new ForbiddenError("You are not the owner of this item.");
       }
       return clothingItem
         .findByIdAndRemove(req.params.id)
 
-        .then(() => res.send({ data: item })); // (item)
+        .then(() => res.send({ data: item }));
     })
     .catch((err) => {
       console.log("error type is:");
       console.log(err.name);
       if (err.name === "CastError") {
-        res.status(VALIDATION_ERROR_CODE).send({ message: err.message });
-      } else if (err.statusCode === NOT_FOUND_CODE) {
-        res.status(NOT_FOUND_CODE).send({ message: err.message });
+        next(new BadRequestError("Something isn't formatted correctly."));
+      } else if (err.statusCode === 404) {
+        next(new NotFoundError("Item ID not found."));
       } else {
-        res
-          .status(DEFAULT_ERROR_CODE)
-          .send({ message: "An error has occurred on the server." });
+        next(err);
       }
     });
 };
 
-module.exports.likeClothingItem = (req, res) => {
+module.exports.likeClothingItem = (req, res, next) => {
   console.log(req.params.id);
   console.log(req.user._id);
 
@@ -84,26 +82,21 @@ module.exports.likeClothingItem = (req, res) => {
       { new: true }
     )
     .orFail(() => {
-      const error = new Error("Item ID not found");
-      error.statusCode = NOT_FOUND_CODE;
-      error.message = "Item ID not found";
-      throw error;
+      throw new NotFoundError("Item ID not found.");
     })
     .then((item) => res.status(201).send({ item }))
     .catch((err) => {
-      if (err.statusCode === NOT_FOUND_CODE) {
-        res.status(NOT_FOUND_CODE).send({ message: err.message });
+      if (err.statusCode === 404) {
+        next(new NotFoundError("Item ID not found."));
       } else if (err.name === "CastError") {
-        res.status(VALIDATION_ERROR_CODE).send({ message: err.message });
+        next(new BadRequestError("Something isn't formatted correctly."));
       } else {
-        res
-          .status(DEFAULT_ERROR_CODE)
-          .send({ message: "An error has occurred on the server." });
+        next(err);
       }
     });
 };
 
-module.exports.unlikeClothingItem = (req, res) => {
+module.exports.unlikeClothingItem = (req, res, next) => {
   clothingItem
     .findByIdAndUpdate(
       req.params.id,
@@ -111,21 +104,16 @@ module.exports.unlikeClothingItem = (req, res) => {
       { new: true }
     )
     .orFail(() => {
-      const error = new Error("Item ID not found");
-      error.statusCode = NOT_FOUND_CODE;
-      error.message = "Item ID not found";
-      throw error;
+      throw new NotFoundError("Item ID not found");
     })
     .then((item) => res.send({ item }))
     .catch((err) => {
-      if (err.statusCode === NOT_FOUND_CODE) {
-        res.status(NOT_FOUND_CODE).send({ message: err.message });
+      if (err.statusCode === 404) {
+        next(new NotFoundError("Item ID not found."));
       } else if (err.name === "CastError") {
-        res.status(VALIDATION_ERROR_CODE).send({ message: err.message });
+        next(new BadRequestError("Something isn't formatted correctly."));
       } else {
-        res
-          .status(DEFAULT_ERROR_CODE)
-          .send({ message: "An error has occurred on the server." });
+        next(err);
       }
     });
 };

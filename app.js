@@ -9,7 +9,8 @@ const mongoose = require("mongoose");
 const clothingItemRouter = require("./routes/clothingItems");
 const userRouter = require("./routes/users");
 const mainRouter = require("./routes/index");
-const { NOT_FOUND_CODE } = require("./utils/errors");
+const errorHandler = require("./middleware/error-handler");
+const { errors } = require("celebrate");
 
 const { PORT = 3001 } = process.env;
 
@@ -28,9 +29,13 @@ mongoose
   .catch(console.error);
 
 app.use((req, res, next) => {
-  res.status(NOT_FOUND_CODE).send({ message: "Requested resource not found" });
+  res.status(404).send({ message: "Requested resource not found" });
   next();
 });
+
+app.use(errors());
+
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`App listening at port ${PORT}`);

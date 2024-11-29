@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const { JWT_SECRET } = require("../utils/config");
 
+/*
 const {
   VALIDATION_ERROR_CODE,
   NOT_FOUND_CODE,
@@ -11,13 +12,17 @@ const {
   UNAUTH_CODE,
   DEFAULT_ERROR_CODE,
 } = require("../utils/errors");
+ */
 
-module.exports.createUser = (req, res) => {
+const UnauthorizedError = require("../errors/unauthorized-error");
+const ConflictError = require("../errors/conflict-error");
+const BadRequestError = require("../errors/bad-request-error");
+const NotFoundError = require("../errors/not-found-error");
+
+module.exports.createUser = (req, res, next) => {
   const { name, avatar, email, password } = req.body;
   if (!email) {
-    return res
-      .status(VALIDATION_ERROR_CODE)
-      .send({ message: "No email provided" });
+    throw new BadRequestError("Email is required");
   }
   return User.findOne({ email })
     .then((user) => {
@@ -35,30 +40,25 @@ module.exports.createUser = (req, res) => {
       })
     )
     .then(
-      () =>
-        // (newUser)
-        res.status(201).send({ name, avatar, email }) // no return
+      () => res.status(201).send({ name, avatar, email }) // no return
     )
     .catch((err) => {
+      console.error();
       if (err.message === "Email already registered") {
-        return res.status(DUPLICATE_CODE).send({ message: err.message });
+        next(new ConflictError("Email already registered"));
       }
       if (err.name === "ValidationError") {
-        return res.status(VALIDATION_ERROR_CODE).send({ message: err.message });
+        next(new BadRequestError("Please enter a properly formatted email."));
       }
-      return res
-        .status(DEFAULT_ERROR_CODE)
-        .send({ message: "An error has occurred on the server." });
+      return next(err);
     });
 };
 
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res
-      .status(VALIDATION_ERROR_CODE)
-      .send({ message: "Both email and password are required." });
+    throw new BadRequestError("Both email and password are required.");
   }
 
   return User.findUserByCredentials(email, password)
@@ -70,34 +70,31 @@ module.exports.login = (req, res) => {
       res.send({ userdata, usertoken });
     })
     .catch((err) => {
-      console.log(err.name);
-      if (err.message === "Incorrect email or password") {
-        res.status(UNAUTH_CODE).send({ message: err.message });
+      if (err.message === "Incorrect email or password.") {
+        next(new UnauthorizedError("Incorrect email or password."));
       } else {
-        res.status(DEFAULT_ERROR_CODE).send({ message: err.message });
+        next(err);
       }
     });
 };
 
-module.exports.getCurrentUser = (req, res) => {
+module.exports.getCurrentUser = (req, res, next) => {
   console.log("Current user is");
   console.log(req.user, req.user._id);
   User.findById(req.user._id)
     .orFail(() => {
-      const error = new Error("Item ID not found");
-      error.statusCode = NOT_FOUND_CODE;
-      error.message = "Item ID not found";
-      throw error;
+      throw new NotFoundError("User ID not found.");
     })
     .then((user) => {
       console.log(user);
       res.send({ data: user });
     })
     .catch((err) => {
-      if (err.statusCode === NOT_FOUND_CODE) {
-        res.status(NOT_FOUND_CODE).send({ message: err.message });
+      console.log(err);
+      if (err.statusCode === 404) {
+        next(new NotFoundError("User not found."));
       } else {
-        res.status(DEFAULT_ERROR_CODE).send({ message: err.message });
+        next(err);
       }
     });
 };
@@ -110,24 +107,21 @@ module.exports.editUserProfile = (req, res) => {
     { new: true, runValidators: true }
   )
     .orFail(() => {
-      const error = new Error("User ID not found");
-      error.statusCode = NOT_FOUND_CODE;
-      error.message = "User ID not found";
-      throw error;
+      throw new NotFoundError("User ID not found.");
     })
     .then((user) => {
-      console.log(user);
       res.send({ data: user });
     })
     .catch((err) => {
+      console.log(err);
       if (err.name === "ValidationError" || err.name === "CastError") {
-        res.status(VALIDATION_ERROR_CODE).send({ message: err.message });
-      } else if (err.statusCode === NOT_FOUND_CODE) {
-        res.status(NOT_FOUND_CODE).send({ message: err.message });
+        next(
+          new BadRequestError("Could not update with information provided.")
+        );
+      } else if (err.statusCode === 404) {
+        next(new NotFoundError("User not found."));
       } else {
-        res
-          .status(DEFAULT_ERROR_CODE)
-          .send({ message: "An error has occurred on the server." });
+        next(err);
       }
     });
 };

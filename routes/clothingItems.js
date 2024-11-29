@@ -11,6 +11,7 @@ const {
 const auth = require("../middleware/auth");
 
 const { validateItemId } = require("../utils/validators");
+const { validateCardBody, validateID } = require("../middleware/validation");
 
 router.get("/items", getClothingItems);
 
@@ -18,12 +19,30 @@ router.get("/items", getClothingItems);
 router.use(auth);
 */
 
-router.post("/items", auth, createClothingItem);
+router.post("/items", validateCardBody, auth, createClothingItem);
 
-router.delete("/items/:id", validateItemId, auth, deleteClothingItem);
+router.delete(
+  "/items/:id",
+  validateID,
+  validateItemId,
+  auth,
+  deleteClothingItem
+);
 
-router.put("/items/:id/likes", validateItemId, auth, likeClothingItem);
+router.put(
+  "/items/:id/likes",
+  validateID,
+  validateItemId,
+  auth,
+  likeClothingItem
+);
 
-router.delete("/items/:id/likes", validateItemId, auth, unlikeClothingItem);
+router.delete(
+  "/items/:id/likes",
+  validateID,
+  validateItemId,
+  auth,
+  unlikeClothingItem
+);
 
 module.exports = router;
