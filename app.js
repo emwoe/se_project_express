@@ -11,7 +11,7 @@ const userRouter = require("./routes/users");
 const mainRouter = require("./routes/index");
 const errorHandler = require("./middleware/error-handler");
 const { errors } = require("celebrate");
-const { requestLogger, errorLogger } = require("./middlewares/logger");
+const { requestLogger, errorLogger } = require("./middleware/logger");
 
 const { PORT = 3001 } = process.env;
 
