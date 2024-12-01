@@ -31,10 +31,11 @@ module.exports.createClothingItem = (req, res, next) => {
     .create({ name, weather, imageUrl, owner: req.user._id, likes: [] })
     .then((item) => res.status(201).send({ data: item }))
     .catch((err) => {
+      console.error(err);
       if (err.name === "ValidationError") {
-        throw new BadRequestError(
-          "Something about this request isn't formatted correctly."
-        );
+        return res.status(400).send({
+          message: "Validation Error: Ensure all fields are filled correctly.",
+        });
       } else {
         next(err);
       }
