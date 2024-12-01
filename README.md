@@ -8,6 +8,6 @@ This is the back-end programming for a What to Wear (WTWR) app. The project crea
 
 `npm run dev` — to launch the server with the hot reload feature
 
-### Testing
+### Live Site
 
-Before committing your code, make sure you edit the file `sprint.txt` in the root folder. The file `sprint.txt` should contain the number of the sprint you're currently working on. For ex. 12
+Please check out the website at whatshouldiwear.crabdance.com
