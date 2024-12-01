@@ -15,14 +15,11 @@ const { validateCardBody, validateID } = require("../middleware/validation");
 
 router.get("/items", getClothingItems);
 
-/*
-router.use(auth);
-*/
+router.post("/items", validateCardBody, auth, createClothingItem);
 
 /*
-router.post("/items", validateCardBody, auth, createClothingItem);
-*/
 router.post("/items", auth, createClothingItem);
+*/
 
 router.delete(
   "/items/:id",
