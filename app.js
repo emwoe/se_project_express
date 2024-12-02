@@ -1,6 +1,6 @@
 require("dotenv").config();
 const express = require("express");
-const = require("cors");
+const cors = require("cors");
 
 const app = express();
 /*
@@ -17,9 +17,11 @@ const { requestLogger, errorLogger } = require("./middleware/logger");
 const { PORT = 3001 } = process.env;
 
 app.use(express.json());
-app.use(cors({
-  origin: 'https://whatshouldiwear.crabdance.com'
-}));
+app.use(
+  cors({
+    origin: "https://whatshouldiwear.crabdance.com",
+  })
+);
 
 app.use(requestLogger);
 
