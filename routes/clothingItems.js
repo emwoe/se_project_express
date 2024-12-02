@@ -9,9 +9,7 @@ const {
 } = require("../controllers/clothingItems");
 
 const auth = require("../middleware/auth");
-/*
-const { validateItemId } = require("../utils/validators");
-*/
+
 const { validateCardBody, validateID } = require("../middleware/validation");
 
 router.get("/items", getClothingItems);
