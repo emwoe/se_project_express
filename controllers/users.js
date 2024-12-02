@@ -98,11 +98,13 @@ module.exports.getCurrentUser = (req, res, next) => {
     });
 };
 
+//Variables below (newName & newImageUrl) match frontend request, but are saved as name/avatar here
+
 module.exports.editUserProfile = (req, res) => {
-  const { name, avatar } = req.body;
+  const { newName, newImageUrl } = req.body;
   User.findByIdAndUpdate(
     req.user._id,
-    { name: name, avatar: avatar },
+    { name: newName, avatar: newImageUrl },
     { new: true, runValidators: true }
   )
     .orFail(() => {
