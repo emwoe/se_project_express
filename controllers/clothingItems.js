@@ -1,14 +1,5 @@
 const clothingItem = require("../models/clothingItem");
 
-/*
-const {
-  VALIDATION_ERROR_CODE,
-  NO_MATCH_CODE,
-  NOT_FOUND_CODE,
-  DEFAULT_ERROR_CODE,/
-} = require("../utils/errors");
- */
-
 const NotFoundError = require("../errors/not-found-error");
 const BadRequestError = require("../errors/bad-request-error");
 const ForbiddenError = require("../errors/forbidden-error");
@@ -33,9 +24,9 @@ module.exports.createClothingItem = (req, res, next) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
-        return res.status(400).send({
-          message: "Validation Error: Ensure all fields are filled correctly.",
-        });
+        next(
+          new BadRequestError("Could not update with information provided.")
+        );
       } else {
         next(err);
       }

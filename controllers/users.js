@@ -66,8 +66,7 @@ module.exports.login = (req, res, next) => {
       const usertoken = jwt.sign({ _id: user._id }, JWT_SECRET, {
         expiresIn: "7d",
       });
-      const userdata = user;
-      res.send({ userdata, usertoken });
+      res.send({ usertoken });
     })
     .catch((err) => {
       if (err.message === "Incorrect email or password.") {
@@ -100,10 +99,10 @@ module.exports.getCurrentUser = (req, res, next) => {
 };
 
 module.exports.editUserProfile = (req, res) => {
-  const { newName, newImageUrl } = req.body;
+  const { name, avatar } = req.body;
   User.findByIdAndUpdate(
     req.user._id,
-    { name: newName, avatar: newImageUrl },
+    { name: name, avatar: avatar },
     { new: true, runValidators: true }
   )
     .orFail(() => {
