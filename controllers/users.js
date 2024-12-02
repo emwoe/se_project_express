@@ -54,6 +54,8 @@ module.exports.createUser = (req, res, next) => {
     });
 };
 
+//The function below no longer works if don't send the userdata back
+
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
@@ -66,7 +68,9 @@ module.exports.login = (req, res, next) => {
       const usertoken = jwt.sign({ _id: user._id }, JWT_SECRET, {
         expiresIn: "7d",
       });
-      res.send({ usertoken });
+      const userdata = user;
+
+      res.send({ userdata, usertoken });
     })
     .catch((err) => {
       if (err.message === "Incorrect email or password.") {
@@ -100,7 +104,7 @@ module.exports.getCurrentUser = (req, res, next) => {
 
 //Variables below (newName & newImageUrl) match frontend request, but are saved as name/avatar here
 
-module.exports.editUserProfile = (req, res) => {
+module.exports.editUserProfile = (req, res, next) => {
   const { newName, newImageUrl } = req.body;
   User.findByIdAndUpdate(
     req.user._id,
