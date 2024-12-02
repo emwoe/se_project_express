@@ -7,13 +7,14 @@ const app = express();
 const bodyParser = require("body-parser");
 */
 const mongoose = require("mongoose");
+const { errors } = require("celebrate");
+
 const clothingItemRouter = require("./routes/clothingItems");
 const userRouter = require("./routes/users");
 const mainRouter = require("./routes/index");
 const errorHandler = require("./middleware/error-handler");
 const NotFoundError = require("./errors/not-found-error");
 
-const { errors } = require("celebrate");
 const { requestLogger, errorLogger } = require("./middleware/logger");
 
 const { PORT = 3001 } = process.env;

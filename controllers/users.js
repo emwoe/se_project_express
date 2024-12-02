@@ -54,7 +54,7 @@ module.exports.createUser = (req, res, next) => {
     });
 };
 
-//The function below no longer works if don't send the userdata back
+//  The function below no longer works if don't send the userdata back //
 
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
@@ -102,7 +102,7 @@ module.exports.getCurrentUser = (req, res, next) => {
     });
 };
 
-//Variables below (newName & newImageUrl) match frontend request, but are saved as name/avatar here
+//  Variables below (newName & newImageUrl) match frontend request, but are saved as name/avatar here
 
 module.exports.editUserProfile = (req, res, next) => {
   const { newName, newImageUrl } = req.body;

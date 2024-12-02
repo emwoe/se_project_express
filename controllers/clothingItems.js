@@ -8,7 +8,7 @@ module.exports.getClothingItems = (req, res, next) => {
   clothingItem
     .find({})
     .then((items) => res.send({ data: items }))
-    .catch(() => {
+    .catch((err) => {
       next(err);
     });
 };
