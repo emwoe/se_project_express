@@ -58,7 +58,7 @@ module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    throw new BadRequestError("Both email and password are required.");
+    next(new BadRequestError("Both email and password are required."));
   }
 
   return User.findUserByCredentials(email, password)

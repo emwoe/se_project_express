@@ -62,9 +62,11 @@ module.exports.validateLoginBody = celebrate({
 });
 
 module.exports.validateID = celebrate({
-  params: Joi.object().keys({
-    id: Joi.string()
-      .required()
-      .regex(/^[A-Fa-f0-9]{24}$/),
-  }),
+  params: Joi.object()
+    .keys({
+      id: Joi.string()
+        .required()
+        .regex(/^[A-Fa-f0-9]{24}$/),
+    })
+    .unknown(true),
 });
