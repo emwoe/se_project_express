@@ -4,16 +4,6 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const { JWT_SECRET } = require("../utils/config");
 
-/*
-const {
-  VALIDATION_ERROR_CODE,
-  NOT_FOUND_CODE,
-  DUPLICATE_CODE,
-  UNAUTH_CODE,
-  DEFAULT_ERROR_CODE,
-} = require("../utils/errors");
- */
-
 const UnauthorizedError = require("../errors/unauthorized-error");
 const ConflictError = require("../errors/conflict-error");
 const BadRequestError = require("../errors/bad-request-error");
@@ -54,8 +44,6 @@ module.exports.createUser = (req, res, next) => {
     });
 };
 
-//  The function below no longer works if don't send the userdata back //
-
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
@@ -68,7 +56,11 @@ module.exports.login = (req, res, next) => {
       const usertoken = jwt.sign({ _id: user._id }, JWT_SECRET, {
         expiresIn: "7d",
       });
-      const userdata = user;
+      const userdata = {
+        name: user.name,
+        avatar: user.avatar,
+        email: user.email,
+      };
 
       res.send({ userdata, usertoken });
     })
@@ -102,13 +94,11 @@ module.exports.getCurrentUser = (req, res, next) => {
     });
 };
 
-//  Variables below (newName & newImageUrl) match frontend request, but are saved as name/avatar here
-
 module.exports.editUserProfile = (req, res, next) => {
-  const { newName, newImageUrl } = req.body;
+  const { name, avatar } = req.body;
   User.findByIdAndUpdate(
     req.user._id,
-    { name: newName, avatar: newImageUrl },
+    { name: name, avatar: avatar },
     { new: true, runValidators: true }
   )
     .orFail(() => {
